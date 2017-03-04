@@ -29,19 +29,25 @@ For customization, edit config.h.
 Running
 -------
 
-Just call it:
+Launch it:
 
     $ multipass
 
-You then move your mouse over a window that you want to select and hit
-the configured hotkey ("PAUSE" by default). That client will be added to
-the list of selected windows. Key events received by multipass itself
-will be broadcasted to all selected windows.
+To switch to "selection mode", click in multipass's window. Then click
+on some other windows to include them in the selection. To end selection
+mode, click in multipass's window again or do a right-click somewhere
+else. Key events received by multipass itself will now be broadcasted to
+all selected windows.
 
 
 See also
 --------
 
+    - xduplic-copier: http://www.chiark.greenend.org.uk/ucgi/~ian/git/chiark-utils.git/
     - keyboardcast (dead?): http://desrt.mcmaster.ca/code/keyboardcast/
     - Terminator: https://gnometerminator.blogspot.de/p/introduction.html
     - Cluster SSH: https://github.com/duncs/clusterssh
+
+I discovered xduplic-copier soon after I wrote multipass. It's *very*
+similar, but I couldn't get it to work on my machine. Still, I really
+like its mouse-selection mode, so I adopted that. Thanks!

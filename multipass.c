@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <X11/cursorfont.h>
 #include <X11/Xatom.h>
 #include <X11/Xft/Xft.h>
 #include <X11/Xlib.h>
@@ -17,6 +18,8 @@ XftColor fg, bg;
 XftFont *font;
 int font_height, font_baseline, font_horiz_margin;
 int win_width = 10, win_height = 10;
+bool selecting = false;
+Cursor crosshair;
 int (*xerrorxlib)(Display *, XErrorEvent *);
 
 #define MAX_TARGETS 128
@@ -87,7 +90,7 @@ create_window(void)
 {
     XSetWindowAttributes wa = {
         .background_pixmap = ParentRelative,
-        .event_mask = KeyPressMask | KeyReleaseMask | ExposureMask,
+        .event_mask = ButtonPressMask | KeyPressMask | KeyReleaseMask | ExposureMask,
     };
     XClassHint ch = {
         .res_class = "Multipass",
@@ -239,21 +242,29 @@ add_target(Window w)
 }
 
 void
+handle_button(XButtonEvent *ev)
+{
+    if (ev->window == win || ev->subwindow == win || ev->button == Button3)
+    {
+        selecting = !selecting;
+        if (selecting)
+            XGrabPointer(dpy, root, False, ButtonPressMask, GrabModeAsync,
+		                 GrabModeAsync, None, crosshair, CurrentTime);
+        else
+            XUngrabPointer(dpy, CurrentTime);
+    }
+    else
+    {
+        if (!remove_target(ev->subwindow))
+            add_target(ev->subwindow);
+        redraw();
+    }
+}
+
+void
 handle_key(XKeyEvent *ev)
 {
-    Window dummy, target;
-    int di;
-    unsigned int dui;
     size_t i;
-
-    if (ev->type == KeyPress && ev->keycode == selection_keycode)
-    {
-        XQueryPointer(dpy, root, &dummy, &target, &di, &di, &di, &di, &dui);
-        if (!remove_target(target))
-            add_target(target);
-        redraw();
-        return;
-    }
 
     for (i = 0; i < MAX_TARGETS; i++)
     {
@@ -301,6 +312,7 @@ main()
     if (!init_font_colors())
         exit(EXIT_FAILURE);
 
+    crosshair = XCreateFontCursor(dpy, XC_crosshair);
     xerrorxlib = XSetErrorHandler(xerror);
 
     for (;;)
@@ -308,6 +320,9 @@ main()
         XNextEvent(dpy, &ev);
         switch (ev.type)
         {
+            case ButtonPress:
+                handle_button(&ev.xbutton);
+                break;
             case KeyPress:
             case KeyRelease:
                 handle_key(&ev.xkey);
