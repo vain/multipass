@@ -218,6 +218,7 @@ remove_target(Window w)
         {
             targets[i] = 0;
             D fprintf(stderr, "multipass: Removed targed %lu\n", w);
+            XSelectInput(dpy, w, NoEventMask);
             return true;
         }
     }
@@ -241,6 +242,7 @@ add_target(Window w)
         {
             targets[i] = w;
             D fprintf(stderr, "multipass: Added targed %lu\n", w);
+            XSelectInput(dpy, w, PropertyChangeMask);
             return;
         }
     }
@@ -317,6 +319,7 @@ main()
                 handle(&ev.xkey);
                 break;
             case Expose:
+            case PropertyNotify:
                 redraw();
                 break;
             case ClientMessage:
