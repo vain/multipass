@@ -1,0 +1,5 @@
+Release history for multipass
+
+next
+  - Initial release.
+  - Broadcast key events to multiple windows.

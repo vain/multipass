@@ -1,0 +1,36 @@
+                               =========
+                               multipass
+                               =========
+
+
+Broadcast X11 key events to multiple windows.
+
+
+Installation
+------------
+
+The following C libraries are required:
+
+    - libx11
+    - libxft
+
+multipass expects to be run on a POSIX-ish operating system.
+
+To build the program, run:
+
+    $ make
+
+To make any customization, edit config.h.
+
+
+Running
+-------
+
+Just call it:
+
+    $ multipass
+
+You then move your mouse over a window that you want to select and hit
+the configured hotkey ("PAUSE" by default). That client will be added to
+the list of selected windows. Key events received by multipass itself,
+will be broadcasted to all selected windows.
