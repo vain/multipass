@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <X11/Xatom.h>
 #include <X11/Xft/Xft.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -13,7 +14,7 @@
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
-Atom atom_protocols, atom_delete;
+Atom atom_protocols, atom_delete, atom_net_wmname;
 Display *dpy;
 int screen;
 Window root, win;
@@ -27,6 +28,48 @@ int (*xerrorxlib)(Display *, XErrorEvent *);
 Window targets[MAX_TARGETS] = {0};
 
 #include "config.h"
+
+void
+get_window_title(char *buf, size_t buf_size, Window w)
+{
+    XTextProperty tp;
+    char **slist = NULL;
+    int count;
+
+    /* Taken from katriawm */
+
+    buf[0] = 0;
+
+    if (!XGetTextProperty(dpy, w, &tp, atom_net_wmname))
+    {
+        if (!XGetTextProperty(dpy, w, &tp, XA_WM_NAME))
+        {
+            strncpy(buf, "<?>", buf_size);
+            return;
+        }
+    }
+
+    if (tp.nitems == 0)
+    {
+        strncpy(buf, "<?>", buf_size);
+        return;
+    }
+
+    if (tp.encoding == XA_STRING)
+        strncpy(buf, (char *)tp.value, buf_size);
+    else
+    {
+        if (XmbTextPropertyToTextList(dpy, &tp, &slist, &count) >= Success &&
+            count > 0 && *slist)
+        {
+            strncpy(buf, slist[0], buf_size - 1);
+            XFreeStringList(slist);
+        }
+    }
+
+    buf[buf_size - 1] = 0;
+    XFree(tp.value);
+}
 
 void
 window_size(int w, int h)
@@ -65,6 +108,7 @@ create_window(void)
 
     atom_protocols = XInternAtom(dpy, "WM_PROTOCOLS", False);
     atom_delete = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
+    atom_net_wmname = XInternAtom(dpy, "_NET_WM_NAME", False);
     XSetWMProtocols(dpy, win, &atom_delete, 1);
 
     gc = XCreateGC(dpy, win, 0, NULL);
@@ -109,7 +153,7 @@ redraw(void)
 {
     XftDraw *xd;
     size_t i, c = 0, vis_c, line = 0;
-    char buf[BUFSIZ] = "";
+    char buf[BUFSIZ] = "", title[BUFSIZ] = "";
 
     for (i = 0; i < MAX_TARGETS; i++)
         if (targets[i] != 0)
@@ -136,7 +180,8 @@ redraw(void)
         {
             if (targets[i] != 0)
             {
-                snprintf(buf, BUFSIZ, "%lu", targets[i]);
+                get_window_title(title, BUFSIZ, targets[i]);
+                snprintf(buf, BUFSIZ, "%lu: %s", targets[i], title);
                 XftDrawStringUtf8(xd, &fg, font,
                                   font_horiz_margin, line * font_height + font_baseline,
                                   (XftChar8 *)buf, strlen(buf));
