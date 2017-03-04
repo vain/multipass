@@ -160,22 +160,35 @@ redraw(void)
 {
     XftDraw *xd;
     XGlyphInfo ext;
-    size_t i, c = 0, line = 0;
+    size_t i, line;
     char buf[BUFSIZ] = "", title[BUFSIZ] = "";
     int new_w = 0, new_h, tw;
-
-    for (i = 0; i < MAX_TARGETS; i++)
-        if (targets[i] != 0)
-            c++;
-
-    new_h = (c == 0 ? 1 : c) * font_height;
 
     XSetForeground(dpy, gc, bg.pixel);
     XFillRectangle(dpy, win, gc, 0, 0, win_width, win_height);
 
     xd = XftDrawCreate(dpy, win, DefaultVisual(dpy, screen),
                        DefaultColormap(dpy, screen));
-    if (c == 0)
+
+    for (line = 0, i = 0; i < MAX_TARGETS; i++)
+    {
+        if (targets[i] != 0)
+        {
+            get_window_title(title, BUFSIZ, targets[i]);
+            snprintf(buf, BUFSIZ, "%lu: %s", targets[i], title);
+
+            XftTextExtentsUtf8(dpy, font, (XftChar8 *)&buf, strlen(buf), &ext);
+            tw = font_horiz_margin + ext.xOff + font_horiz_margin;
+            new_w = MAX(new_w, tw);
+
+            XftDrawStringUtf8(xd, &fg, font,
+                              font_horiz_margin, line * font_height + font_baseline,
+                              (XftChar8 *)buf, strlen(buf));
+            line++;
+        }
+    }
+
+    if (line == 0)
     {
         snprintf(buf, BUFSIZ, "<list empty>");
         XftTextExtentsUtf8(dpy, font, (XftChar8 *)&buf, strlen(buf), &ext);
@@ -184,28 +197,12 @@ redraw(void)
         XftDrawStringUtf8(xd, &fg, font,
                           font_horiz_margin, line * font_height + font_baseline,
                           (XftChar8 *)buf, strlen(buf));
+        line++;
     }
-    else
-    {
-        for (i = 0; i < MAX_TARGETS; i++)
-        {
-            if (targets[i] != 0)
-            {
-                get_window_title(title, BUFSIZ, targets[i]);
-                snprintf(buf, BUFSIZ, "%lu: %s", targets[i], title);
 
-                XftTextExtentsUtf8(dpy, font, (XftChar8 *)&buf, strlen(buf), &ext);
-                tw = font_horiz_margin + ext.xOff + font_horiz_margin;
-                new_w = MAX(new_w, tw);
-
-                XftDrawStringUtf8(xd, &fg, font,
-                                  font_horiz_margin, line * font_height + font_baseline,
-                                  (XftChar8 *)buf, strlen(buf));
-                line++;
-            }
-        }
-    }
     XftDrawDestroy(xd);
+
+    new_h = line * font_height;
 
     if (new_w != win_width || new_h != win_height)
         window_size(new_w, new_h);
