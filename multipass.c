@@ -22,6 +22,7 @@ GC gc;
 XftColor fg, bg;
 XftFont *font;
 int font_height, font_baseline, font_horiz_margin;
+int win_width = 10, win_height = 10;
 int (*xerrorxlib)(Display *, XErrorEvent *);
 
 #define MAX_TARGETS 128
@@ -83,6 +84,8 @@ window_size(int w, int h)
     };
     XResizeWindow(dpy, win, w, h);
     XSetWMNormalHints(dpy, win, &sh);
+    win_width = w;
+    win_height = h;
 }
 
 void
@@ -97,12 +100,12 @@ create_window(void)
         .res_name = "multipass",
     };
 
-    win = XCreateWindow(dpy, root, 0, 0, win_width, 10, 0,
+    win = XCreateWindow(dpy, root, 0, 0, win_width, win_height, 0,
                         DefaultDepth(dpy, screen),
                         CopyFromParent, DefaultVisual(dpy, screen),
                         CWBackPixmap | CWEventMask,
                         &wa);
-    window_size(win_width, 10);
+    window_size(win_width, win_height);
     XSetClassHint(dpy, win, &ch);
     XMapWindow(dpy, win);
 
@@ -152,27 +155,31 @@ void
 redraw(void)
 {
     XftDraw *xd;
-    size_t i, c = 0, vis_c, line = 0;
+    XGlyphInfo ext;
+    size_t i, c = 0, line = 0;
     char buf[BUFSIZ] = "", title[BUFSIZ] = "";
+    int new_w = 0, new_h, tw;
 
     for (i = 0; i < MAX_TARGETS; i++)
         if (targets[i] != 0)
             c++;
 
-    vis_c = c == 0 ? 1 : c;
-
-    window_size(win_width, vis_c * font_height);
+    new_h = (c == 0 ? 1 : c) * font_height;
 
     XSetForeground(dpy, gc, bg.pixel);
-    XFillRectangle(dpy, win, gc, 0, 0, win_width, vis_c * font_height);
+    XFillRectangle(dpy, win, gc, 0, 0, win_width, win_height);
 
     xd = XftDrawCreate(dpy, win, DefaultVisual(dpy, screen),
                        DefaultColormap(dpy, screen));
     if (c == 0)
     {
+        snprintf(buf, BUFSIZ, "<list empty>");
+        XftTextExtentsUtf8(dpy, font, (XftChar8 *)&buf, strlen(buf), &ext);
+        new_w = font_horiz_margin + ext.xOff + font_horiz_margin;
+
         XftDrawStringUtf8(xd, &fg, font,
                           font_horiz_margin, line * font_height + font_baseline,
-                          (XftChar8 *)"<list empty>", strlen("<list empty>"));
+                          (XftChar8 *)buf, strlen(buf));
     }
     else
     {
@@ -182,6 +189,11 @@ redraw(void)
             {
                 get_window_title(title, BUFSIZ, targets[i]);
                 snprintf(buf, BUFSIZ, "%lu: %s", targets[i], title);
+
+                XftTextExtentsUtf8(dpy, font, (XftChar8 *)&buf, strlen(buf), &ext);
+                tw = font_horiz_margin + ext.xOff + font_horiz_margin;
+                new_w = MAX(new_w, tw);
+
                 XftDrawStringUtf8(xd, &fg, font,
                                   font_horiz_margin, line * font_height + font_baseline,
                                   (XftChar8 *)buf, strlen(buf));
@@ -190,6 +202,9 @@ redraw(void)
         }
     }
     XftDrawDestroy(xd);
+
+    if (new_w != win_width || new_h != win_height)
+        window_size(new_w, new_h);
 }
 
 bool
