@@ -114,6 +114,10 @@ create_window(void)
     atom_net_wmname = XInternAtom(dpy, "_NET_WM_NAME", False);
     XSetWMProtocols(dpy, win, &atom_delete, 1);
 
+    XChangeProperty(dpy, win, atom_net_wmname,
+                    XInternAtom(dpy, "UTF8_STRING", False), 8, PropModeReplace,
+                    (unsigned char *)"multipass", strlen("multipass"));
+
     gc = XCreateGC(dpy, win, 0, NULL);
 }
 
