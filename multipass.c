@@ -232,14 +232,14 @@ add_target(Window w)
         if (targets[i] == 0)
         {
             targets[i] = w;
-            XSelectInput(dpy, w, PropertyChangeMask);
+            XSelectInput(dpy, w, PropertyChangeMask | StructureNotifyMask);
             return;
         }
     }
 }
 
 void
-handle(XKeyEvent *ev)
+handle_key(XKeyEvent *ev)
 {
     Window dummy, target;
     int di;
@@ -265,15 +265,19 @@ handle(XKeyEvent *ev)
     }
 }
 
+void
+handle_unmap(XUnmapEvent *ev)
+{
+    remove_target(ev->window);
+    redraw();
+}
+
 int
 xerror(Display *dpy, XErrorEvent *ee)
 {
     if (ee->error_code == BadWindow)
-    {
-        remove_target(ee->resourceid);
-        redraw();
         return 0;
-    }
+
     return xerrorxlib(dpy, ee); /* may call exit */
 }
 
@@ -306,11 +310,14 @@ main()
         {
             case KeyPress:
             case KeyRelease:
-                handle(&ev.xkey);
+                handle_key(&ev.xkey);
                 break;
             case Expose:
             case PropertyNotify:
                 redraw();
+                break;
+            case UnmapNotify:
+                handle_unmap(&ev.xunmap);
                 break;
             case ClientMessage:
                 cm = &ev.xclient;
