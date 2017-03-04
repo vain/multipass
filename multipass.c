@@ -6,12 +6,6 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
-#ifdef DEBUG
-#define D if (true)
-#else
-#define D if (false)
-#endif
-
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 Atom atom_protocols, atom_delete, atom_net_wmname;
@@ -218,7 +212,6 @@ remove_target(Window w)
         if (targets[i] == w)
         {
             targets[i] = 0;
-            D fprintf(stderr, "multipass: Removed targed %lu\n", w);
             XSelectInput(dpy, w, NoEventMask);
             return true;
         }
@@ -232,17 +225,13 @@ add_target(Window w)
     size_t i;
 
     if (w == win)
-    {
-        D fprintf(stderr, "multipass: Refusing to add myself\n");
         return;
-    }
 
     for (i = 0; i < MAX_TARGETS; i++)
     {
         if (targets[i] == 0)
         {
             targets[i] = w;
-            D fprintf(stderr, "multipass: Added targed %lu\n", w);
             XSelectInput(dpy, w, PropertyChangeMask);
             return;
         }
