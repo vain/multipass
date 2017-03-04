@@ -18,7 +18,7 @@ XftColor fg, bg;
 XftFont *font;
 int font_height, font_baseline, font_horiz_margin;
 int win_width = 10, win_height = 10;
-bool selecting = false;
+bool selecting = true;
 Cursor crosshair;
 int (*xerrorxlib)(Display *, XErrorEvent *);
 
@@ -312,8 +312,11 @@ main()
     if (!init_font_colors())
         exit(EXIT_FAILURE);
 
-    crosshair = XCreateFontCursor(dpy, XC_crosshair);
     xerrorxlib = XSetErrorHandler(xerror);
+
+    crosshair = XCreateFontCursor(dpy, XC_crosshair);
+    XGrabPointer(dpy, root, False, ButtonPressMask, GrabModeAsync,
+                 GrabModeAsync, None, crosshair, CurrentTime);
 
     for (;;)
     {

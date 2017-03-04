@@ -33,11 +33,13 @@ Launch it:
 
     $ multipass
 
-To switch to "selection mode", click in multipass's window. Then click
-on some other windows to include them in the selection. To end selection
-mode, click in multipass's window again or do a right-click somewhere
-else. Key events received by multipass itself will now be broadcasted to
-all selected windows.
+It starts in "selection mode", so your mouse cursor will turn into a
+crosshair. Click on some other windows to include them in the selection.
+To end selection mode, click in multipass's window again or do a
+right-click somewhere else. Key events received by multipass itself will
+now be broadcasted to all selected windows.
+
+To re-enter selection mode later on, click in multipass's window.
 
 
 See also
