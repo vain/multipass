@@ -60,7 +60,7 @@ get_window_title(char *buf, size_t buf_size, Window w)
         if (XmbTextPropertyToTextList(dpy, &tp, &slist, &count) >= Success &&
             count > 0 && *slist)
         {
-            strncpy(buf, slist[0], buf_size - 1);
+            strncpy(buf, slist[0], buf_size);
             XFreeStringList(slist);
         }
     }
