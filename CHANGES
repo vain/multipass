@@ -1,5 +1,5 @@
 Release history for multipass
 
-next
+v17.03  2017-03-05
   - Initial release.
   - Broadcast key events to multiple windows.
