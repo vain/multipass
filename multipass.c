@@ -245,27 +245,29 @@ add_target(Window w)
 Window
 find_window_with_wm_state(Window w)
 {
-    Atom *atoms = NULL;
-    int inum = 0, i;
+    Atom da;
+    int di;
+    unsigned long dul;
+    unsigned char *prop_ret = NULL;
     unsigned int uinum = 0, ui;
     Window dummy, *wins = NULL, final;
 
     /* Check if the current window has the property WM_STATE. This
      * property is supposed to be set by any ICCCM complient window
      * manager. If the property is present, then this is (probably) the
-     * window that the user meant to select. */
-    atoms = XListProperties(dpy, w, &inum);
-    if (atoms != NULL)
+     * window that the user meant to select.
+     *
+     * What's that "0" and "1"? It selects the first item in the list of
+     * WM_STATE atoms (there are usually two). */
+    if (XGetWindowProperty(dpy, w, atom_wm_state, 0, 1, False, AnyPropertyType,
+                           &da, &di, &dul, &dul, &prop_ret)
+        == Success)
     {
-        for (i = 0; i < inum; i++)
+        if (prop_ret)
         {
-            if (atoms[i] == atom_wm_state)
-            {
-                XFree(atoms);
-                return w;
-            }
+            XFree(prop_ret);
+            return w;
         }
-        XFree(atoms);
     }
 
     /* Okay, no WM_STATE on the current window. Have a look at all of
