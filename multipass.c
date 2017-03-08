@@ -253,7 +253,7 @@ find_window_with_wm_state(Window w)
     Window dummy, *wins = NULL, final;
 
     /* Check if the current window has the property WM_STATE. This
-     * property is supposed to be set by any ICCCM complient window
+     * property is supposed to be set by any ICCCM compliant window
      * manager. If the property is present, then this is (probably) the
      * window that the user meant to select.
      *
@@ -271,8 +271,9 @@ find_window_with_wm_state(Window w)
     }
 
     /* Okay, no WM_STATE on the current window. Have a look at all of
-     * its child windows (and possibly grandchildren or whatever).
-     * Iterate and recurse until you find a window with WM_STATE. */
+     * its child windows (and possibly grandchildren or even deeper
+     * levels). Iterate and recurse until you find a window with
+     * WM_STATE. */
     if (XQueryTree(dpy, w, &dummy, &dummy, &wins, &uinum))
     {
         for (ui = 0; ui < uinum; ui++)
