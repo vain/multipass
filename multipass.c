@@ -9,7 +9,7 @@
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
-Atom atom_protocols, atom_delete, atom_net_wmname;
+Atom atom_protocols, atom_delete, atom_net_wmname, atom_wm_state;
 Display *dpy;
 int screen;
 Window root, win;
@@ -109,6 +109,7 @@ create_window(void)
     atom_protocols = XInternAtom(dpy, "WM_PROTOCOLS", False);
     atom_delete = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
     atom_net_wmname = XInternAtom(dpy, "_NET_WM_NAME", False);
+    atom_wm_state = XInternAtom(dpy, "WM_STATE", False);
     XSetWMProtocols(dpy, win, &atom_delete, 1);
 
     XChangeProperty(dpy, win, atom_net_wmname,
@@ -241,10 +242,58 @@ add_target(Window w)
     }
 }
 
+Window
+find_window_with_wm_state(Window w)
+{
+    Atom *atoms = NULL;
+    int inum = 0, i;
+    unsigned int uinum = 0, ui;
+    Window dummy, *wins = NULL, final;
+
+    /* Check if the current window has the property WM_STATE. This
+     * property is supposed to be set by any ICCCM complient window
+     * manager. If the property is present, then this is (probably) the
+     * window that the user meant to select. */
+    atoms = XListProperties(dpy, w, &inum);
+    if (atoms != NULL)
+    {
+        for (i = 0; i < inum; i++)
+        {
+            if (atoms[i] == atom_wm_state)
+            {
+                XFree(atoms);
+                return w;
+            }
+        }
+        XFree(atoms);
+    }
+
+    /* Okay, no WM_STATE on the current window. Have a look at all of
+     * its child windows (and possibly grandchildren or whatever).
+     * Iterate and recurse until you find a window with WM_STATE. */
+    if (XQueryTree(dpy, w, &dummy, &dummy, &wins, &uinum))
+    {
+        for (ui = 0; ui < uinum; ui++)
+        {
+            final = find_window_with_wm_state(wins[ui]);
+            if (final != None)
+            {
+                XFree(wins);
+                return final;
+            }
+        }
+        XFree(wins);
+    }
+
+    return None;
+}
+
 void
 handle_button(XButtonEvent *ev)
 {
-    if (ev->window == win || ev->subwindow == win || ev->button == Button3)
+    Window selected;
+
+    if (ev->window == win || ev->button == Button3)
     {
         selecting = !selecting;
         if (selecting)
@@ -255,8 +304,15 @@ handle_button(XButtonEvent *ev)
     }
     else
     {
-        if (!remove_target(ev->subwindow))
-            add_target(ev->subwindow);
+        selected = find_window_with_wm_state(ev->subwindow);
+        if (selected == None)
+        {
+            fprintf(stderr, "multipass: Could not find a client window\n");
+            return;
+        }
+
+        if (!remove_target(selected))
+            add_target(selected);
         redraw();
     }
 }
