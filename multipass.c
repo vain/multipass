@@ -79,8 +79,8 @@ window_size(int w, int h)
         .min_height = h,
         .max_height = h,
     };
-    XResizeWindow(dpy, win, w, h);
     XSetWMNormalHints(dpy, win, &sh);
+    XResizeWindow(dpy, win, w, h);
     win_width = w;
     win_height = h;
 }

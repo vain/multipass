@@ -3,7 +3,8 @@ Release history for multipass
 next
   [Fixed]
   - Compatibility with reparenting window managers has been improved.
-    multipass has been tested with katriawm, Openbox and i3.
+    multipass has been tested with katriawm, Openbox, i3 and
+    Compiz (Unity on Ubuntu 16.04).
 
 v17.03  2017-03-05
   - Initial release.
