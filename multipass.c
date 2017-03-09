@@ -178,7 +178,7 @@ redraw(void)
         if (targets[i] != 0)
         {
             get_window_title(title, BUFSIZ, targets[i]);
-            snprintf(buf, BUFSIZ, "%lu: %s", targets[i], title);
+            snprintf(buf, BUFSIZ, "0x%lx: %s", targets[i], title);
 
             XftTextExtentsUtf8(dpy, font, (XftChar8 *)&buf, strlen(buf), &ext);
             tw = font_horiz_margin + ext.xOff + font_horiz_margin;

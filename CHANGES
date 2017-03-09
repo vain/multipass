@@ -11,6 +11,8 @@ next
   - It is no longer possible to end selection mode by left-clicking in
     multipass's window. You must issue a right-click anywhere on the
     screen.
+  - Window IDs are now shown as hex since virtually all other tools do
+    this as well.
 
 v17.03  2017-03-05
   - Initial release.
