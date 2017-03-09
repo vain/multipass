@@ -228,9 +228,6 @@ add_target(Window w)
 {
     size_t i;
 
-    if (w == win)
-        return;
-
     for (i = 0; i < MAX_TARGETS; i++)
     {
         if (targets[i] == 0)
@@ -313,6 +310,8 @@ handle_button(XButtonEvent *ev)
             fprintf(stderr, "multipass: Could not find a client window\n");
             return;
         }
+        else if (selected == win)
+            return;
 
         if (!remove_target(selected))
             add_target(selected);
