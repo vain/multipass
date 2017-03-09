@@ -12,6 +12,7 @@
 Atom atom_protocols, atom_delete, atom_net_wmname, atom_wm_state;
 Display *dpy;
 int screen;
+Pixmap pm = None;
 Window root, win;
 GC gc;
 XftColor fg, bg;
@@ -83,6 +84,10 @@ window_size(int w, int h)
     XResizeWindow(dpy, win, w, h);
     win_width = w;
     win_height = h;
+
+    if (pm != None)
+        XFreePixmap(dpy, pm);
+    pm = XCreatePixmap(dpy, root, w, h, DefaultDepth(dpy, screen));
 }
 
 void
@@ -163,9 +168,9 @@ redraw(void)
     int new_w = 0, new_h, tw;
 
     XSetForeground(dpy, gc, bg.pixel);
-    XFillRectangle(dpy, win, gc, 0, 0, win_width, win_height);
+    XFillRectangle(dpy, pm, gc, 0, 0, win_width, win_height);
 
-    xd = XftDrawCreate(dpy, win, DefaultVisual(dpy, screen),
+    xd = XftDrawCreate(dpy, pm, DefaultVisual(dpy, screen),
                        DefaultColormap(dpy, screen));
 
     for (line = 0, i = 0; i < MAX_TARGETS; i++)
@@ -199,6 +204,8 @@ redraw(void)
     }
 
     XftDrawDestroy(xd);
+
+    XCopyArea(dpy, pm, win, gc, 0, 0, win_width, win_height, 0, 0);
 
     new_h = line * font_height;
 
