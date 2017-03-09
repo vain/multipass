@@ -6,6 +6,11 @@ next
     multipass has been tested with katriawm, Openbox, i3 and
     Compiz (Unity on Ubuntu 16.04).
 
+  [Changed]
+  - It is no longer possible to end selection mode by left-clicking in
+    multipass's window. You must issue a right-click anywhere on the
+    screen.
+
 v17.03  2017-03-05
   - Initial release.
   - Broadcast key events to multiple windows.
