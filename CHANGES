@@ -1,6 +1,6 @@
 Release history for multipass
 
-next
+v17.03.11  2017-03-11
   [Fixed]
   - Compatibility with reparenting window managers has been improved.
     multipass has been tested with katriawm, Openbox, i3 and
