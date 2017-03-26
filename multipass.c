@@ -93,6 +93,9 @@ window_size(int w, int h)
 void
 create_window(void)
 {
+    Window dummy;
+    int x, y, di;
+    unsigned int dui;
     XSetWindowAttributes wa = {
         .background_pixmap = ParentRelative,
         .event_mask = ButtonPressMask | KeyPressMask | KeyReleaseMask | ExposureMask,
@@ -102,7 +105,9 @@ create_window(void)
         .res_name = "multipass",
     };
 
-    win = XCreateWindow(dpy, root, 0, 0, win_width, win_height, 0,
+    XQueryPointer(dpy, root, &dummy, &dummy, &x, &y, &di, &di, &dui);
+
+    win = XCreateWindow(dpy, root, x, y, win_width, win_height, 0,
                         DefaultDepth(dpy, screen),
                         CopyFromParent, DefaultVisual(dpy, screen),
                         CWBackPixmap | CWEventMask,
