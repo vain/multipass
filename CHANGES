@@ -1,6 +1,6 @@
 Release history for multipass
 
-next
+v17.04  2017-04-08
   [Changed]
   - multipass's window now spawns at the mouse pointer's location (if
     your window manager respects this request).
