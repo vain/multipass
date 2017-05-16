@@ -310,7 +310,7 @@ handle_button(XButtonEvent *ev)
         selecting = !selecting;
         if (selecting)
             XGrabPointer(dpy, root, False, ButtonPressMask, GrabModeAsync,
-		                 GrabModeAsync, None, crosshair, CurrentTime);
+                         GrabModeAsync, None, crosshair, CurrentTime);
         else
             XUngrabPointer(dpy, CurrentTime);
     }
