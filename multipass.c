@@ -169,7 +169,7 @@ redraw(void)
     XftDraw *xd;
     XGlyphInfo ext;
     size_t i, line;
-    char buf[BUFSIZ] = "", title[BUFSIZ] = "";
+    char buf[2 * BUFSIZ] = "", title[BUFSIZ] = "";
     int new_w = 0, new_h, tw;
 
     XSetForeground(dpy, gc, bg.pixel);
@@ -183,7 +183,7 @@ redraw(void)
         if (targets[i] != 0)
         {
             get_window_title(title, BUFSIZ, targets[i]);
-            snprintf(buf, BUFSIZ, "0x%lx: %s", targets[i], title);
+            snprintf(buf, 2 * BUFSIZ, "0x%lx: %s", targets[i], title);
 
             XftTextExtentsUtf8(dpy, font, (XftChar8 *)&buf, strlen(buf), &ext);
             tw = font_horiz_margin + ext.xOff + font_horiz_margin;
