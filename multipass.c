@@ -182,8 +182,8 @@ redraw(void)
     {
         if (targets[i] != 0)
         {
-            get_window_title(title, BUFSIZ, targets[i]);
-            snprintf(buf, 2 * BUFSIZ, "0x%lx: %s", targets[i], title);
+            get_window_title(title, sizeof title, targets[i]);
+            snprintf(buf, sizeof buf, "0x%lx: %s", targets[i], title);
 
             XftTextExtentsUtf8(dpy, font, (XftChar8 *)&buf, strlen(buf), &ext);
             tw = font_horiz_margin + ext.xOff + font_horiz_margin;
@@ -198,7 +198,7 @@ redraw(void)
 
     if (line == 0)
     {
-        snprintf(buf, BUFSIZ, "<list empty>");
+        snprintf(buf, sizeof buf, "<list empty>");
         XftTextExtentsUtf8(dpy, font, (XftChar8 *)&buf, strlen(buf), &ext);
         new_w = font_horiz_margin + ext.xOff + font_horiz_margin;
 
