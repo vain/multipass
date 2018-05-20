@@ -1,5 +1,9 @@
 Release history for multipass
 
+v18.05  2018-05-20
+  [Fixed]
+  - Deal with new warnings of GCC 8.1.
+
 v17.09  2017-09-09
   [LICENSING]
   - The project has been relicensed under the MIT license (more
